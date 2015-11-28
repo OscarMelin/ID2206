@@ -7,6 +7,21 @@ int num_procs;
 int num_pipes;
 int pipes[3][2];
 
+void pipes_init() {
+
+    int ret;
+    int i;
+
+    for(i = 0; i < num_procs - 1; ++i) {
+
+        ret = pipe(pipes[i]);
+
+        if(ret == -1) {
+            perror("pipe");
+            exit(1);
+        }
+    }
+}
 
 int main(int argc, char *argv[]) {
 
@@ -20,7 +35,7 @@ int main(int argc, char *argv[]) {
     num_pipes = 2 + args;
 
     /*Initialize pipes*/
-
+    pipes_init();
 
     /* Set pager */
 
