@@ -2,7 +2,7 @@
 #include <stdlib.h>
 #include <unistd.h>
 #include <sys/wait.h>
-
+#include <sys/types.h>
 
 int args;
 int num_procs;
@@ -41,6 +41,26 @@ void close_all_fd() {
                 perror("close");
                 exit(-1);
             }
+        }
+    }
+}
+
+void wait_for_kids() {
+
+    int status;
+    pid_t pid;
+    int i;
+
+    for (i = 0; i < num_procs; i++) {
+        
+        /* Wait for process to finish */
+        pid = wait(&status);
+		if(!WIFEXITED(status)) {
+            
+            /* Process exited abnormaly */
+            perror("wait_for_kids");
+            /*TODO Some cleanup funtion call??*/            
+            exit(-1);        
         }
     }
 }
@@ -121,37 +141,7 @@ int main(int argc, char *argv[]) {
 
     /* Close all file descriptors*/
     close_all_fd();
-    /* Wait for all processes to finish */
-    int status;
-    int i;
-    for(i = 0; i < num_procs; ++i)
-    {
-        do{
-            wait(&status);
-        } while(!WIFEXITED(status) && !WIFSIGNALED(status));
-
-        /* If the process ended abnormally, kill all other processes */
-        if(WIFSIGNALED(status)/* || WEXITSTATUS(status) != 0*/) /* Kills itself as well. */
-        {
-            fprintf(stderr, "error, process exited abnormally.\n");
-            kill(0, SIGTERM); /* Eller SIGKILL */
-            return -1;
-        }
-    }
-
-/*
-    if( argc == 2 ) {
-
-        printf("The argument supplied is %s\n", argv[1]);
-    }
-    else if( argc > 2 ) {
-
-        printf("Too many arguments supplied.\n");
-    }
-    else {
-
-        printf("One argument expected.\n");
-    }
-*/
+    /* Wait for all child processes to terminate */
+    wait_for_kids();
     return 0;
 }
