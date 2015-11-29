@@ -23,6 +23,22 @@ void pipes_init() {
     }
 }
 
+int exec_proc(int fd_in, int fd_out, char *program, char *argv[]) {
+
+    int pid = fork();
+
+    if (pid == 0) {
+
+
+
+
+    } else if (pid == -1) {
+        perror("exec_proc()");
+        exit(-1);
+    }
+
+}
+
 int main(int argc, char *argv[]) {
 
     char *pager = getenv("PAGER");
