@@ -1,6 +1,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
+#include <sys/wait.h>
+
 
 int args;
 int num_procs;
@@ -45,45 +47,46 @@ void close_all_fd() {
 
 int exec_proc(int fd_in, int fd_out, char *program, char *argv[]) {
     
-    printf("Executing: %s\n", program);
     int pid = fork();
 
     if (pid == 0) {
         
+        printf("Forked: %s\n", program);
         /*Duplicate stdin and stdout file descriptors*/
         int ret;
 
         ret = dup2(fd_in, STDIN_FILENO);
         if (ret == -1) {
 
-            perror("exec_proc");
+            perror("exec_proc\n");
             exit(-1);
         }
         ret = dup2(fd_out, STDOUT_FILENO);
         if (ret == -1) {
             
-            perror("exec_proc");
+            perror("exec_proc\n");
             exit(-1);
         }
 
         /*Close all file descriptors in pipes*/
         close_all_fd();        
-
+        
         /*check if grep*/
         if (args) {
-
+            
             execvp(program, argv);            
-
         } else {
 
-            /*NO GREP*/
+            char *ptr[2] = {program, (char*) NULL};
+            execvp(program, ptr);
         }
 
     } else if (pid == -1) {
+        printf("exec_proc failed\n");
         perror("exec_proc");
         exit(-1);
     }
-
+    return 0;
 }
 
 int main(int argc, char *argv[]) {
@@ -117,8 +120,25 @@ int main(int argc, char *argv[]) {
     exec_proc(pipes[1 +args][0], STDOUT_FILENO, "less", argv);
 
     /* Close all file descriptors*/
-
+    close_all_fd();
     /* Wait for all processes to finish */
+    int status;
+    int i;
+    for(i = 0; i < num_procs; ++i)
+    {
+        do{
+            wait(&status);
+        } while(!WIFEXITED(status) && !WIFSIGNALED(status));
+
+        /* If the process ended abnormally, kill all other processes */
+        if(WIFSIGNALED(status)/* || WEXITSTATUS(status) != 0*/) /* Kills itself as well. */
+        {
+            fprintf(stderr, "error, process exited abnormally.\n");
+            kill(0, SIGTERM); /* Eller SIGKILL */
+            return -1;
+        }
+    }
+
 /*
     if( argc == 2 ) {
 
