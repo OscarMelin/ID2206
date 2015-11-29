@@ -44,7 +44,8 @@ void close_all_fd() {
 }
 
 int exec_proc(int fd_in, int fd_out, char *program, char *argv[]) {
-
+    
+    printf("Executing: %s\n", program);
     int pid = fork();
 
     if (pid == 0) {
@@ -68,7 +69,15 @@ int exec_proc(int fd_in, int fd_out, char *program, char *argv[]) {
         /*Close all file descriptors in pipes*/
         close_all_fd();        
 
-                
+        /*check if grep*/
+        if (args) {
+
+            execvp(program, argv);            
+
+        } else {
+
+            /*NO GREP*/
+        }
 
     } else if (pid == -1) {
         perror("exec_proc");
@@ -93,12 +102,19 @@ int main(int argc, char *argv[]) {
     /* Set pager */
 
     /* Execute printenv */
+    exec_proc(STDIN_FILENO, pipes[0][1], "printenv", argv); 
 
     /* Check and execute grep */
+    if (args) {
+
+        exec_proc(pipes[0][0], pipes[args][1], "grep", argv);
+    }
 
     /* Execute sort */
+    exec_proc(pipes[args][0], pipes[1 + args][1], "sort", argv);
 
     /* Execute less or more */
+    exec_proc(pipes[1 +args][0], STDOUT_FILENO, "less", argv);
 
     /* Close all file descriptors*/
 
