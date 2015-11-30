@@ -1,8 +1,23 @@
+/*
+TODO
+
+SET PAGER!?
+
+CLEAN UP!?
+
+SIGNAL HANDELER!?
+*/
+
+
+
+
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
 #include <sys/wait.h>
 #include <sys/types.h>
+#include <string.h>
 
 int args;
 int num_procs;
@@ -14,7 +29,7 @@ void pipes_init() {
     int ret;
     int i;
 
-    for (i = 0; i < num_procs - 1; ++i) {
+    for (i = 0; i < num_procs - 1; i++) {
 
         ret = pipe(pipes[i]);
 
@@ -48,18 +63,18 @@ void close_all_fd() {
 void wait_for_kids() {
 
     int status;
-    pid_t pid;
     int i;
 
     for (i = 0; i < num_procs; i++) {
         
         /* Wait for process to finish */
-        pid = wait(&status);
+        wait(&status);
 		if(!WIFEXITED(status)) {
             
             /* Process exited abnormaly */
             perror("wait_for_kids");
-            /*TODO Some cleanup funtion call??*/            
+            /*TODO Some cleanup funtion call??*/
+            kill(0, SIGTERM);
             exit(-1);        
         }
     }
@@ -71,12 +86,11 @@ int exec_proc(int fd_in, int fd_out, char *program, char *argv[]) {
 
     if (pid == 0) {
         
-        printf("Forked: %s\n", program);
         /*Duplicate stdin and stdout file descriptors*/
         int ret;
 
         ret = dup2(fd_in, STDIN_FILENO);
-        if (ret == -1) {
+        if (ret == -1) { 
 
             perror("exec_proc\n");
             exit(-1);
@@ -92,17 +106,21 @@ int exec_proc(int fd_in, int fd_out, char *program, char *argv[]) {
         close_all_fd();        
         
         /*check if grep*/
-        if (args) {
+        if (!strcmp(program, "grep")) {
             
-            execvp(program, argv);            
+            execvp(program, argv);
+            exit(-1);        
         } else {
 
-            char *ptr[2] = {program, (char*) NULL};
+            char *ptr[2];
+            ptr[0] = program;
+            ptr[1] = (char*) NULL;
             execvp(program, ptr);
+            exit(-1);
         }
 
     } else if (pid == -1) {
-        printf("exec_proc failed\n");
+
         perror("exec_proc");
         exit(-1);
     }
