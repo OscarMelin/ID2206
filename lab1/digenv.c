@@ -32,12 +32,11 @@ EXAMPLES:
 #include <sys/types.h>
 #include <string.h>
 
-int args;
-int num_procs;
-int num_pipes;
-int pipes[3][2];
-char *pager;
-
+int args;           /* 1 if digenv supplied with args, else 0*/
+int num_procs;      /* number of processes needed*/
+int num_pipes;      /* number of pipes needed*/
+int pipes[3][2];    /* pipe storage*/
+char *pager;        /* pager to be used for displaying*/
 
 /* Initializes all required pipes */
 void pipes_init() {
