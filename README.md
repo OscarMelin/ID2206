@@ -1,6 +1,6 @@
-gcc -ansi -pedantic -W -Wall -omyprog myprog.c
+gcc -pedantic -W -Wall -o digenv digenv.c
 
-./myprog
+./digenv.c
 
 -W -Wall turns on many, many useful warnings. These warning messages will often be the first hint that your program has a serious error in it which needs immediate attention. Without the flags, your compiler would just give you your program without letting you know about these potential problems.
 
