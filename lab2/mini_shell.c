@@ -55,7 +55,7 @@ void sigintHandler() {
 
 #ifndef SIGNALDETECTION
 /* Listens for terminated bg-processes */
-void bg_sig_handler(int signal, pid_t fg_pid) {
+void bg_sig_handler() {
 
     int status;
 
@@ -71,9 +71,6 @@ void bg_sig_handler(int signal, pid_t fg_pid) {
         if(WIFEXITED(status) || WIFSIGNALED(status))
             printf("Terminated background pid: %d\n", pid);
 
-        if(pid == fg_pid) {
-            continue;
-        }
     }
         return;
 }
@@ -178,7 +175,7 @@ int exec_program(char *str) {
     params[0] = strtok(str, " \t\n");
 
     #ifndef SIGNALDETECTION
-    bg_sig_handler(SIGCHLD, pid);
+    bg_sig_handler();
     #endif
 
     if (params[0] == NULL) {
@@ -251,7 +248,7 @@ int main() {
 
     #ifdef SIGNALDETECTION
     printf("Using SIGNALDETECTION\n");
-    signal( SIGCHLD, handle_child);
+    signal(SIGCHLD, handle_child);
     #endif
     signal(SIGINT, sigintHandler);
 
