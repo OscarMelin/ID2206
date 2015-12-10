@@ -265,10 +265,6 @@ int main() {
             fputs(">>> ", stdout);
 
             input = fgets(str, sizeof(str), stdin);
-
-            #ifndef SIGNALDETECTION
-            #endif
-
     
             if (exec_program(input)) {
 
