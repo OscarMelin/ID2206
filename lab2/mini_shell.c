@@ -17,6 +17,7 @@ EXAMPLES:
 #include <sys/wait.h>
 #include <sys/types.h>
 #include <string.h>
+#include <time.h>
 
 int exit_mini_shell = 0; /*1 if exit*/
 
@@ -80,6 +81,9 @@ int exec_program(char *str) {
 
     pid_t pid;
     int status;
+    /* Timing vars */
+    clock_t begin, end;
+    double time_spent;
 
     /* Parse first parameter */
     params[0] = strtok(str, " \t\n");
