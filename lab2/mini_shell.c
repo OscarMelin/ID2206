@@ -34,9 +34,8 @@ void sigintHandler(int sig_num)
 
 pid_t exec_proc(char *program, char *params[], int background) {
     
-    pid_t pid = fork();
+    pid_t pid;
     int pipes[2];
-    int status;
     
     if (background) {
 
@@ -50,7 +49,6 @@ pid_t exec_proc(char *program, char *params[], int background) {
         if (background) {
 
             int ret;
-
             ret = dup2(pipes[STDIN_FILENO], STDIN_FILENO);
             if (ret == -1) { 
 
@@ -71,20 +69,6 @@ pid_t exec_proc(char *program, char *params[], int background) {
         perror("exec_proc");
         exit(-1);
     }
-
-    if (background) {
-    
-        /* Close pipes */
-        close(pipes[0]);
-        close(pipes[1]);
-
-    } else {
-
-
-        waitpid(pid, &status, 0);
-        printf("Spawned pid: %d\n", pid);
-        printf("With status: %d\n", status);
-    }
     return pid;
 }
 
@@ -93,6 +77,9 @@ int exec_program(char *str) {
 
     char *params[5];
     int i;
+
+    pid_t pid;
+    int status;
 
     /* Parse first parameter */
     params[0] = strtok(str, " \t\n");
@@ -123,9 +110,21 @@ int exec_program(char *str) {
 	} else {
 
     /* TODO: Check if & as last param, then run as background */
+        /*if (background) {
+        
+            Close pipes
+            close(pipes[0]);
+            close(pipes[1]);
 
+        }*/
     /* Foreground */
-        exec_proc(params[0], params, 0);
+
+        pid = exec_proc(params[0], params, 0);
+        printf("Spawned pid: %d\n", pid);
+        waitpid(pid, &status, 0);
+
+        printf("With status: %d\n", status);
+
     }
 
     return 0;
