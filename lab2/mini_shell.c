@@ -77,6 +77,7 @@ void bg_sig_handler() {
 #endif
 
 #ifdef SIGNALDETECTION
+/* Signalhandler */
 void handle_child(int signo) {
 
     pid_t pid;
@@ -92,6 +93,8 @@ void handle_child(int signo) {
 }
 #endif
 
+/* Changes working directory, if no path or an incorrect path is
+given; cd will change working directory to HOME. */
 int change_directory(char *path) {
 
     int ret;
@@ -102,7 +105,8 @@ int change_directory(char *path) {
         
         printf("cd to: %s\n", path);
         return 0;
-
+    
+    /* Bad or no path*/
     } else {
         
         ret = chdir(getenv("HOME"));       
@@ -120,6 +124,8 @@ int change_directory(char *path) {
     }
 }
 
+/* Forks and executes execvp() w/ or w/o pipes depending on if it is run as
+background */
 pid_t exec_proc(char *program, char *params[], int background) {
     
     pid_t pid;
@@ -132,7 +138,7 @@ pid_t exec_proc(char *program, char *params[], int background) {
 
     pid = fork();
 
-    if ( pid == 0 ) { /* child-process kod */
+    if ( pid == 0 ) {
 
         if (background) {
 
@@ -160,7 +166,11 @@ pid_t exec_proc(char *program, char *params[], int background) {
     return pid;
 }
 
-/*Returns 1 - if exit*/
+/*
+If exit command, returns 1
+Otherwise parses arguments and starts correct built in function or either
+background or forground-process with exec_proc.
+*/
 int exec_program(char *str) {
 
     char *params[5];
@@ -197,7 +207,8 @@ int exec_program(char *str) {
 	} else if(!strcmp(params[0], "cd")) {
 
         change_directory(params[1]);
-    /*  */
+
+    /* No call for built in, initialize start of process */
 	} else {
 
         /* Check if & as last param, then run as background */
@@ -222,7 +233,8 @@ int exec_program(char *str) {
                 printf("Spawned background pid: %d\n", pid);
 
         } else {
-        /* Foreground */
+
+            /* Foreground */
 
             signal(SIGINT, sigintHandler);
 
@@ -265,10 +277,10 @@ int main() {
     
             if (exec_program(input)) {
 
-                break;            
+                /* exit given - quit program */
+                break;
             }
         }
-    
         if (exit_mini_shell) {
             
             break;
