@@ -20,6 +20,15 @@ EXAMPLES:
 
 int exit_mini_shell = 0; /*1 if exit*/
 
+/* Signal Handler for SIGINT */
+void sigintHandler(int sig_num)
+{
+    /* Reset handler to catch SIGINT next time. */
+    signal(SIGINT, sigintHandler);
+    printf("\n Cannot be terminated using Ctrl+C \n");
+    fflush(stdout);
+}
+
 pid_t exec_proc(char *program, char *params[], int background) {
     
     pid_t pid = fork();
@@ -35,14 +44,25 @@ pid_t exec_proc(char *program, char *params[], int background) {
 
     if ( pid == 0 ) { /* child-process kod */
 
-        execvp(program, params);
-        exit(-1);
-    }
-    else if ( pid > 0) { /* parent-process kod */
+        if (background) {
 
-        waitpid(pid, &status, 0);
-    }
-    else { /* SYSTEM ERROR */
+            int ret;
+
+            ret = dup2(pipes[STDIN_FILENO], STDIN_FILENO);
+            if (ret == -1) { 
+
+                perror("exec_proc");
+                exit(-1);
+            }
+            close(pipes[0]);
+            close(pipes[1]);
+        }
+
+        execvp(program, params);
+		printf("%s: command not found", params[0]);
+        exit(-1);
+
+    } else if (pid == -1) {
 
         perror("exec_proc");
         exit(-1);
@@ -50,10 +70,13 @@ pid_t exec_proc(char *program, char *params[], int background) {
 
     if (background) {
     
-    /* Close pipes */
+        /* Close pipes */
+        close(pipes[0]);
+        close(pipes[1]);
+
     } else {
 
-
+        waitpid(pid, &status, 0);
     }
     return pid;
 }
@@ -105,6 +128,8 @@ int main(int argc, char *argv[]) {
 
     char str[72];
     char *input;
+    
+    signal(SIGINT, sigintHandler);
 
     for (;;) {
 
