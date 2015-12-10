@@ -32,6 +32,27 @@ void sigintHandler(int sig_num)
 }
 */
 
+void bg_sig_handler(int signal, pid_t fg_pid) {
+
+    for (;;) {
+
+        pid_t pid = waitpid(-1, &signal, WNOHANG);
+
+        /* Nothing to wait for */
+        if(pid <= 0) {
+            break;
+        }
+
+        if(WIFEXITED(signal) || WIFSIGNALED(signal))
+            printf("Terminated background pid: %d\n", pid);
+
+        if(pid == fg_pid) {
+            continue;
+        }
+    }
+        return;
+}
+
 int change_directory(char *path) {
 
     int ret;
@@ -78,7 +99,7 @@ pid_t exec_proc(char *program, char *params[], int background) {
 
             int ret;
             ret = dup2(pipes[STDIN_FILENO], STDIN_FILENO);
-            if (ret == -1) { 
+            if (ret == -1) {
 
                 perror("exec_proc");
                 exit(-1);
@@ -107,6 +128,7 @@ int exec_program(char *str) {
     int i;
     int background;
     pid_t pid;
+    pid_t bg_stat;
     int status;
     /* Timing vars */
     clock_t begin, end;
@@ -116,7 +138,8 @@ int exec_program(char *str) {
 
 
     if (params[0] == NULL) {
-
+        
+        bg_sig_handler(SIGCHLD, pid);
         return 0;    
     }
     /* Parse the remaining parameters */
@@ -153,13 +176,16 @@ int exec_program(char *str) {
             }
         }
 
-        if (background) {
+        if (background == 1) {
             
                 /* Close pipes 
                 close(pipes[0]);
                 close(pipes[1]);*/
                 printf("BACKGROUND\n");
                 pid = exec_proc(params[0], params, 1);
+
+                bg_sig_handler(SIGCHLD, pid);
+
 
         } else {
         /* Foreground */
@@ -205,7 +231,8 @@ int main(int argc, char *argv[]) {
     
         if (exit_mini_shell) {
             
-            /*Call some cleanup function here*/
+            /* Cleanup */
+            bg_sig_handler(SIGCHLD, pid);
             break;
         }
     }
