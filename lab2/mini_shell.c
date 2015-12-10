@@ -1,17 +1,36 @@
 /*
 NAME:
 
+    mini_shell.c - Simple shell like program with little practical use
+
 SYNTAX:
+
+    [PROGRAM] [ARGS]
 
 DESCRIPTION:
 
+    mini_shell allows for running programs as either forground or background
+    processes.
+
+    Commands must not be longer than 70 characters and contain < 5 arguments.
+
+    Built in functions include:
+
+        cd [path] - changes working directory, if no path or an incorrect path is
+        given; cd will change working directory to HOME.
+
+        exit - exits shell
+
 OPTIONS:
+
+    Compile with flag -DSIGNALDETECTION to use signal handler, otherwise defaults
+    to polling.
 
 EXAMPLES:
 
-    gcc -pedantic -W -Wall -o mini_shell mini_shell.c
-
-    gcc -pedantic -W -Wall -DSIGNALDETECTION -o mini_shell mini_shell.c
+    Compilation:
+        gcc -pedantic -W -Wall -o mini_shell mini_shell.c
+        gcc -pedantic -W -Wall -DSIGNALDETECTION -o mini_shell mini_shell.c
 
 */
 
@@ -26,7 +45,7 @@ EXAMPLES:
 int exit_mini_shell = 0; /*1 if exit*/
 
 /* Signal Handler for SIGINT */
-void sigintHandler(int sig_num) {
+void sigintHandler() {
 
     /* Reset handler to catch SIGINT next time. */
     signal(SIGINT, sigintHandler);
@@ -35,6 +54,7 @@ void sigintHandler(int sig_num) {
 }
 
 #ifndef SIGNALDETECTION
+/* Listens for terminated bg-processes */
 void bg_sig_handler(int signal, pid_t fg_pid) {
 
     int status;
@@ -60,11 +80,11 @@ void bg_sig_handler(int signal, pid_t fg_pid) {
 #endif
 
 #ifdef SIGNALDETECTION
-//Handler for checking if a child has terminated
 void handle_child(int signo) {
 
-    pid_t pid = 1;
+    pid_t pid;
     int status;
+
     if( signo == SIGCHLD ){
 
         while (0 < (pid = waitpid (-1, & status , WNOHANG))){
@@ -150,7 +170,6 @@ int exec_program(char *str) {
     int i;
     int background;
     pid_t pid;
-    pid_t bg_stat;
     int status;
     /* Timing vars */
     clock_t begin, end;
@@ -202,11 +221,8 @@ int exec_program(char *str) {
 
         if (background == 1) {
             
-                /* Close pipes 
-                close(pipes[0]);
-                close(pipes[1]);*/
-                printf("BACKGROUND\n");
                 pid = exec_proc(params[0], params, 1);
+                printf("Spawned background pid: %d\n", pid);
 
         } else {
         /* Foreground */
@@ -228,7 +244,7 @@ int exec_program(char *str) {
     return 0;
 }
 
-int main(int argc, char *argv[]) {
+int main() {
 
     char str[72];
     char *input;
