@@ -231,8 +231,6 @@ int main(int argc, char *argv[]) {
     
         if (exit_mini_shell) {
             
-            /* Cleanup */
-            bg_sig_handler(SIGCHLD, pid);
             break;
         }
     }
