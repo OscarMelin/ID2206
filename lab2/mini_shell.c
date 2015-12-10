@@ -9,6 +9,10 @@ OPTIONS:
 
 EXAMPLES:
 
+    gcc -pedantic -W -Wall -o mini_shell mini_shell.c
+
+    gcc -pedantic -W -Wall -DSIGNALDETECTION -o mini_shell mini_shell.c
+
 */
 
 #include <stdio.h>
@@ -22,28 +26,29 @@ EXAMPLES:
 int exit_mini_shell = 0; /*1 if exit*/
 
 /* Signal Handler for SIGINT */
-/*
-void sigintHandler(int sig_num)
-{
-    Reset handler to catch SIGINT next time.
+void sigintHandler(int sig_num) {
+
+    /* Reset handler to catch SIGINT next time. */
     signal(SIGINT, sigintHandler);
-    printf("\n Cannot be terminated using Ctrl+C \n");
+    printf("\n>>>");
     fflush(stdout);
 }
-*/
 
+#ifndef SIGNALDETECTION
 void bg_sig_handler(int signal, pid_t fg_pid) {
+
+    int status;
 
     for (;;) {
 
-        pid_t pid = waitpid(-1, &signal, WNOHANG);
+        pid_t pid = waitpid(-1, &status, WNOHANG);
 
         /* Nothing to wait for */
         if(pid <= 0) {
             break;
         }
 
-        if(WIFEXITED(signal) || WIFSIGNALED(signal))
+        if(WIFEXITED(status) || WIFSIGNALED(status))
             printf("Terminated background pid: %d\n", pid);
 
         if(pid == fg_pid) {
@@ -52,6 +57,23 @@ void bg_sig_handler(int signal, pid_t fg_pid) {
     }
         return;
 }
+#endif
+
+#ifdef SIGNALDETECTION
+//Handler for checking if a child has terminated
+void handle_child(int signo) {
+
+    pid_t pid = 1;
+    int status;
+    if( signo == SIGCHLD ){
+
+        while (0 < (pid = waitpid (-1, & status , WNOHANG))){
+
+        printf("Terminated background pid: %d\n", pid);
+        }
+    }
+}
+#endif
 
 int change_directory(char *path) {
 
@@ -136,11 +158,13 @@ int exec_program(char *str) {
     /* Parse first parameter */
     params[0] = strtok(str, " \t\n");
 
+    #ifndef SIGNALDETECTION
+    bg_sig_handler(SIGCHLD, pid);
+    #endif
 
     if (params[0] == NULL) {
-        
-        bg_sig_handler(SIGCHLD, pid);
-        return 0;    
+
+        return 0;
     }
     /* Parse the remaining parameters */
     for (i = 1; i < 5; i++) {
@@ -184,11 +208,10 @@ int exec_program(char *str) {
                 printf("BACKGROUND\n");
                 pid = exec_proc(params[0], params, 1);
 
-                bg_sig_handler(SIGCHLD, pid);
-
-
         } else {
         /* Foreground */
+
+            signal(SIGINT, sigintHandler);
 
             begin = clock();
 
@@ -209,12 +232,17 @@ int main(int argc, char *argv[]) {
 
     char str[72];
     char *input;
-    
-    /*signal(SIGINT, sigintHandler);*/
+
+    #ifdef SIGNALDETECTION
+    printf("Using SIGNALDETECTION\n");
+    signal( SIGCHLD, handle_child);
+    #endif
+    signal(SIGINT, sigintHandler);
 
     for (;;) {
 
         input = NULL;
+
 
         for (;;) {
 
@@ -222,7 +250,10 @@ int main(int argc, char *argv[]) {
 
             input = fgets(str, sizeof(str), stdin);
 
+            #ifndef SIGNALDETECTION
+            #endif
 
+    
             if (exec_program(input)) {
 
                 break;            
