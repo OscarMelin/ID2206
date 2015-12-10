@@ -105,7 +105,7 @@ int exec_program(char *str) {
 
     char *params[5];
     int i;
-
+    int background;
     pid_t pid;
     int status;
     /* Timing vars */
@@ -137,28 +137,45 @@ int exec_program(char *str) {
     /*  */
 	} else {
 
-    /* TODO: Check if & as last param, then run as background */
-        /*if (background) {
-        
-            Close pipes
-            close(pipes[0]);
-            close(pipes[1]);
+        /* Check if & as last param, then run as background */
+        for (i = 4; i > 0; i--) {
 
-        }*/
-    /* Foreground */
+            if (params[i]) {
 
-        begin = clock();
+                if (!strcmp(params[i], "&")) {
 
-        pid = exec_proc(params[0], params, 0);
-        printf("Spawned pid: %d\n", pid);
-        waitpid(pid, &status, 0);
+                    background = 1;
+                } else {
+                    
+                    background = 0;
+                }
+                break;
+            }
+        }
 
-        end = clock();
-        printf("Terminated pid: %d\n", pid);
-        printf("Elapsed: %f seconds\n", (double)(end - begin) / CLOCKS_PER_SEC);
+        if (background) {
+            
+                /* Close pipes 
+                close(pipes[0]);
+                close(pipes[1]);*/
+                printf("BACKGROUND\n");
+                pid = exec_proc(params[0], params, 1);
 
+        } else {
+        /* Foreground */
+
+            begin = clock();
+
+            pid = exec_proc(params[0], params, 0);
+            printf("Spawned pid: %d\n", pid);
+            waitpid(pid, &status, 0);
+
+            end = clock();
+            printf("Terminated pid: %d\n", pid);
+            printf("Elapsed: %f seconds\n", (double)(end - begin) / CLOCKS_PER_SEC);
+
+        }
     }
-
     return 0;
 }
 
@@ -184,7 +201,6 @@ int main(int argc, char *argv[]) {
 
                 break;            
             }
-
         }
     
         if (exit_mini_shell) {
