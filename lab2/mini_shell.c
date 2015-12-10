@@ -21,13 +21,16 @@ EXAMPLES:
 int exit_mini_shell = 0; /*1 if exit*/
 
 /* Signal Handler for SIGINT */
+/*
 void sigintHandler(int sig_num)
 {
-    /* Reset handler to catch SIGINT next time. */
+    Reset handler to catch SIGINT next time.
     signal(SIGINT, sigintHandler);
     printf("\n Cannot be terminated using Ctrl+C \n");
     fflush(stdout);
 }
+*/
+
 
 pid_t exec_proc(char *program, char *params[], int background) {
     
@@ -57,9 +60,10 @@ pid_t exec_proc(char *program, char *params[], int background) {
             close(pipes[0]);
             close(pipes[1]);
         }
-
+        
         execvp(program, params);
-		printf("%s: command not found", params[0]);
+
+		fprintf(stderr, "%s: command not found\n", params[0]);
         exit(-1);
 
     } else if (pid == -1) {
@@ -76,7 +80,10 @@ pid_t exec_proc(char *program, char *params[], int background) {
 
     } else {
 
+
         waitpid(pid, &status, 0);
+        printf("Spawned pid: %d\n", pid);
+        printf("With status: %d\n", status);
     }
     return pid;
 }
@@ -129,7 +136,7 @@ int main(int argc, char *argv[]) {
     char str[72];
     char *input;
     
-    signal(SIGINT, sigintHandler);
+    /*signal(SIGINT, sigintHandler);*/
 
     for (;;) {
 
@@ -140,6 +147,7 @@ int main(int argc, char *argv[]) {
             fputs(">>> ", stdout);
 
             input = fgets(str, sizeof(str), stdin);
+
 
             if (exec_program(input)) {
 
