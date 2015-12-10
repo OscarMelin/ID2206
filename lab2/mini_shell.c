@@ -32,6 +32,33 @@ void sigintHandler(int sig_num)
 }
 */
 
+int change_directory(char *path) {
+
+    int ret;
+    
+    ret = chdir(path);
+
+    if (ret == 0) {
+        
+        printf("cd to: %s\n", path);
+        return 0;
+
+    } else {
+        
+        ret = chdir(getenv("HOME"));       
+    
+        if (ret == 0) {
+
+            fprintf(stderr, "%s empty or unaccessible, cd to HOME\n", path);
+            return 0;
+
+        } else {
+
+            fprintf(stderr, "error: HOME unreachable\n");
+            return -1;
+        }
+    }
+}
 
 pid_t exec_proc(char *program, char *params[], int background) {
     
@@ -83,7 +110,6 @@ int exec_program(char *str) {
     int status;
     /* Timing vars */
     clock_t begin, end;
-    double time_spent;
 
     /* Parse first parameter */
     params[0] = strtok(str, " \t\n");
@@ -107,9 +133,7 @@ int exec_program(char *str) {
 
 	} else if(!strcmp(params[0], "cd")) {
 
-        /*Change directory of process with chdir(path)*/
-        printf("cd command");
-
+        change_directory(params[1]);
     /*  */
 	} else {
 
@@ -123,11 +147,15 @@ int exec_program(char *str) {
         }*/
     /* Foreground */
 
+        begin = clock();
+
         pid = exec_proc(params[0], params, 0);
         printf("Spawned pid: %d\n", pid);
         waitpid(pid, &status, 0);
 
-        printf("With status: %d\n", status);
+        end = clock();
+        printf("Terminated pid: %d\n", pid);
+        printf("Elapsed: %f seconds\n", (double)(end - begin) / CLOCKS_PER_SEC);
 
     }
 
