@@ -1,3 +1,6 @@
+lab 1 + lab 2 is for old version of course
+
+
 gcc -pedantic -W -Wall -o digenv digenv.c
 
 ./digenv.c
