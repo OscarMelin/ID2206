@@ -1,11 +1,24 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <sys/types.h>
+#include <unistd.h>
 
-int main(int argc, char **argv, char **envp) { 
+char global[] = "This is a global string";
 
-    int i;
+int main() { 
 
-    for(i=0; envp[i]!= NULL; i++)
-        printf("%2d:%s\n",i, envp[i]);
+	int pid = getpid();
 
+	foo:
+
+		printf("process id: %d\n", pid);
+		printf("global string: %p\n", &global);
+		printf("the code: %p\n", &&foo);
+
+		printf("\n\n /proc/%d/maps \n\n", pid);
+		char command[50];
+		sprintf(command, "cat /proc/%d/maps", pid);
+		system(command);
+
+	return 0;
 }
