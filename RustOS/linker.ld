@@ -1,16 +1,16 @@
 ENTRY(start)
 
 SECTIONS {
-    . = 1M;
+  . = 1M;
 
-    .boot :
-    {
-        /* ensure that the multiboot header is at the beginning */
-        *(.multiboot_header)
-    }
+  .boot :
+  {
+    /* ensure that the multiboot header is at the beginning */
+    *(.multiboot_header)
+  }
 
-    .text :
-    {
-        *(.text)
-    }
+  .text :
+  {
+    *(.text)
+  }
 }
