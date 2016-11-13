@@ -22,11 +22,6 @@ error:
     mov byte  [0xb800a], al
     hlt
 
-section .bss
-stack_bottom:
-    resb 64
-stack_top:
-
 ; Throw error 0 if eax doesn't contain the Multiboot 2 magic value (0x36d76289).
 check_multiboot:
     cmp eax, 0x36d76289
@@ -90,3 +85,9 @@ check_long_mode:
 .no_long_mode:
     mov al, "2"
     jmp error
+
+section .bss
+stack_bottom:
+    resb 64
+stack_top:
+
