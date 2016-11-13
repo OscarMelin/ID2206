@@ -22,3 +22,14 @@ section .bss
 stack_bottom:
     resb 64
 stack_top:
+
+; Throw error 0 if eax doesn't contain the Multiboot 2 magic value (0x36d76289).
+check_multiboot:
+    cmp eax, 0x36d76289
+    jne .no_multiboot
+    ret
+.no_multiboot:
+    mov al, "0"
+    jmp error
+
+
