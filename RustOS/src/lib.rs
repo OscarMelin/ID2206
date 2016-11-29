@@ -5,12 +5,13 @@
 extern crate rlibc;
 extern crate volatile;
 extern crate spin;
+extern crate multiboot2;
 
 #[macro_use]
 mod vga_buffer;
 
 #[no_mangle]
-pub extern "C" fn rust_main() {
+pub extern "C" fn rust_main(multiboot_information_address: usize) {
     // ATTENTION: we have a very small stack and no guard page
     vga_buffer::clear_screen();
     println!("Hello World{}", "!");
