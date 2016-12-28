@@ -1,4 +1,0 @@
-Stack
-
-Heap
-
