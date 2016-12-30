@@ -1,9 +1,17 @@
 # Dictionairy for key terms
 
+##Processes
+
 ###Stack
 
 ###Heap
 
+##Scheduling
+
+
+##Virtual memory
+
+###Segmentation
 
 ###Page table
 
@@ -22,7 +30,6 @@ each of these frames can contain a single virtual-memory page.
 
 ###External fragmentation
 
-
 ###TLB, translation-lookaside buffer
 
 A TLB is part of the chip’s memory-management unit (MMU), and is simply a 
@@ -32,3 +39,20 @@ reference, the hardware first checks the TLB to see if the desired translation
 is held therein; if so, the translation is performed (quickly) without having to 
 consult the page table (which has all translations). Because of their tremendous 
 performance impact, TLBs in a real sense make virtual memory possible.
+
+###Inverted page tables
+
+##Memory management
+
+##Multithreaded programming
+
+##Filesystem
+
+##Virtualisation
+
+##Implementation
+
+
+
+
+
