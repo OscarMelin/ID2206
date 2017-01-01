@@ -8,6 +8,11 @@
 
 ###System call
 
+###Limited direct execution
+
+Direct execution: Just running a program directly on the CPU.  
+Limited direct execution: Limiting the running program in terms of restricting operations to keep the OS in control.
+
 ##Scheduling
 
 
