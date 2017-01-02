@@ -13,6 +13,7 @@
 Direct execution: Just running a program directly on the CPU.  
 Limited direct execution: Limiting the running program in terms of restricting operations to keep the OS in control.
 
+
 ##Scheduling
 
 ###Multi level feedback queue
@@ -21,7 +22,12 @@ Limited direct execution: Limiting the running program in terms of restricting o
 
 Proportional-share is based around a simple concept: instead of optimizing for
 turnaround or response time, a scheduler might instead try to guarantee that
-each job obtain a certain percentage of CPU time.
+each job obtain a certain percentage of CPU time. Two main concepts:
+
+####Lottery scheduling and Stride scheduling
+
+Lottery uses randomness in a clever way to achieve proportional share; stride
+does so deterministically.
 
 ##Virtual memory
 
