@@ -15,6 +15,13 @@ Limited direct execution: Limiting the running program in terms of restricting o
 
 ##Scheduling
 
+###Multi level feedback queue
+
+###Proportional share
+
+Proportional-share is based around a simple concept: instead of optimizing for
+turnaround or response time, a scheduler might instead try to guarantee that
+each job obtain a certain percentage of CPU time.
 
 ##Virtual memory
 
