@@ -13,3 +13,4 @@ gcc -pedantic -W -Wall -o digenv digenv.c
 
 
 -ansi -pedantic makes gcc conform strictly to the C standard; again, extra strictness means less chance of errors going past the compiler undetected.
+
